@@ -1,16 +1,16 @@
-# Бот-помощник по выбору профессии 🎓✨
+
 import sqlite3
 import telebot
 from telebot import types
 
-# Подключаем бота (как вкл телефон 📱)
-bot = telebot.TeleBot("8050066037:AAGrBK-xrXjXWXB5AGJHk0oJaWP3oFtGodM")  # 👈 сюда токен бота вставить!
+# Подключаем бота 
+bot = telebot.TeleBot("8050066037:AAGrBK-xrXjXWXB5AGJHk0oJaWP3oFtGodM")  # токен бота
 
-# База данных (как тетрадка 📒)
+# База данных 
 conn = sqlite3.connect('profession_helper.db', check_same_thread=False)
 cursor = conn.cursor()
 
-# Создаем таблички (разделы в тетрадке 📝)
+# Создаем таблички 
 cursor.execute('''CREATE TABLE IF NOT EXISTS users
                   (id INTEGER PRIMARY KEY AUTOINCREMENT,
                    user_id INTEGER,
@@ -30,14 +30,14 @@ cursor.execute('''CREATE TABLE IF NOT EXISTS professions
                    name TEXT,
                    description TEXT)''')
 
-# Добавляем профессии (чтобы было из чего выбирать 💼)
+# Добавляем профессии 
 professions_data = [
     ('Гуманитарий', 'Общительный', 'Журналист', 'Пишешь статьи и берешь интервью у интересных людей! '),
     ('Гуманитарий', 'Аналитик', 'Психолог', 'Помогаешь людям разбираться в их чувствах и проблемах '),
     ('Технарь', 'Логик', 'Программист', 'Создаешь приложения и сайты, как настоящий волшебник! '),
     ('Технарь', 'Творческий', 'Дизайнер', 'Придумываешь красивые сайты и приложения '),
     ('Естественник', 'Умник', 'Ученый', 'Проводишь опыты и делаешь открытия! '),
-    ('Естественник', 'Помощник', 'Врач', 'Лечишь людей и спасаешь жизни! 👩')
+    ('Естественник', 'Помощник', 'Врач', 'Лечишь людей и спасаешь жизни! ')
 ]
 
 # Проверяем, есть ли профессии в базе
@@ -45,7 +45,7 @@ if cursor.execute("SELECT COUNT(*) FROM professions").fetchone()[0] == 0:
     cursor.executemany("INSERT INTO professions (direction, result_type, name, description) VALUES (?, ?, ?, ?)", professions_data)
     conn.commit()
 
-# Вопросы для теста (их 10) ❓
+# Вопросы для тест
 questions = [
     "1. Тебе нравится общаться с людьми? 💬",
     "2. Любишь решать сложные задачки? �",
@@ -59,7 +59,7 @@ questions = [
     "10. Мечтаешь о необычной профессии? 🚀"
 ]
 
-# Кнопочки для ответов 🔘
+#  для ответов 
 def make_keyboard():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(types.KeyboardButton('1 - Не про меня 🙅‍♀️'))
@@ -69,7 +69,7 @@ def make_keyboard():
     markup.add(types.KeyboardButton('5 - Точно про меня! 💯'))
     return markup
 
-# Кнопочки выбора направления 🗺️
+# выбора направления 
 def direction_buttons():
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     markup.add(types.KeyboardButton('Гуманитарий 📚'))
@@ -77,7 +77,6 @@ def direction_buttons():
     markup.add(types.KeyboardButton('Естественник 🔬'))
     return markup
 
-# Начало работы с ботом 🏁
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.send_message(message.chat.id, 
@@ -90,7 +89,7 @@ def send_welcome(message):
     cursor.execute("INSERT OR IGNORE INTO users (user_id, name) VALUES (?, ?)", 
                    (message.from_user.id, message.from_user.first_name))
     conn.commit()
-    # Обработка выбора направления 🧭
+    # Обработка выбора направления 
 @bot.message_handler(func=lambda m: m.text in ['Гуманитарий 📚', 'Технарь 💻', 'Естественник 🔬'])
 def choose_direction(message):
     direction = message.text.split()[0]
@@ -108,7 +107,7 @@ def choose_direction(message):
                     + questions[0],
                     reply_markup=make_keyboard())
 
-# Обработка ответов на вопросы 📝
+# Обработка ответов на вопросы 
 user_answers = {}  # Здесь временно храним ответы
 
 @bot.message_handler(func=lambda m: any(str(i) in m.text for i in range(1,6)))
@@ -136,7 +135,7 @@ def handle_answer(message):
         bot.send_message(message.chat.id, "Что-то пошло не так 😅 Давай попробуем еще раз!")
         bot.send_message(message.chat.id, questions[0], reply_markup=make_keyboard())
 
-# Показываем результаты 🎯
+# Показываем результаты 
 def show_results(message):
     user_id = message.from_user.id
     
@@ -177,8 +176,9 @@ def show_results(message):
     
     bot.send_message(message.chat.id, msg, parse_mode='HTML', reply_markup=types.ReplyKeyboardRemove())
 
-# Запускаем бота! 🚀
-print("Бот запущен! Работаем! 💪")
+# Запускаем бота! 
+print("Бот запущен! Работаем! ")
 bot.polling(none_stop=True)
+
 
 
